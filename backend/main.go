@@ -25,10 +25,12 @@ func main() {
 	if err != nil {
 		log.Fatal("gagal terhubung ke database: ", err)
 	}
-	// Membuat / memperbarui tabel users otomatis
-	if err := db.AutoMigrate(&User{}); err != nil {
+
+	// Membuat / memperbarui semua tabel otomatis (cukup dipanggil sekali)
+	if err := db.AutoMigrate(&User{}, &Kelas{}, &JadwalRequest{}); err != nil {
 		log.Fatal("gagal migrasi: ", err)
 	}
+	seedAdmin(db) // membuat akun admin kalau belum ada
 
 	h := &Handler{
 		DB:        db,
@@ -43,11 +45,26 @@ func main() {
 		AllowHeaders:    []string{"Origin", "Content-Type", "Authorization"},
 	}))
 
+	// Hanya foto profil yang publik. Jangan menyajikan seluruh /uploads,
+	// karena lampiran jadwal ada di uploads/jadwal dan harus tetap privat.
+	r.Static("/uploads/avatars", "./uploads/avatars")
+
 	api := r.Group("/api")
 	{
 		api.POST("/register", h.Register)
 		api.POST("/login", h.Login)
 		api.GET("/me", h.AuthRequired(), h.Me)
+		api.POST("/me/photo", h.AuthRequired(), h.UploadPhoto)
+
+		api.GET("/kelas", h.AuthRequired(), h.ListKelas)
+		api.POST("/kelas", h.AuthRequired(), h.CreateKelas)
+
+		api.POST("/jadwal-requests", h.AuthRequired(), h.CreateJadwalRequest)
+		api.GET("/jadwal-requests", h.AuthRequired(), h.ListJadwalRequests)
+		api.DELETE("/jadwal-requests/:id", h.AuthRequired(), h.DeleteJadwalRequest)
+
+		admin := api.Group("/admin", h.AuthRequired(), h.AdminRequired())
+		admin.GET("/users", h.ListUsers)
 	}
 
 	log.Println("server berjalan di :8080")

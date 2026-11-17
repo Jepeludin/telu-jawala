@@ -28,6 +28,7 @@ class _RegisterPageState extends State<RegisterPage> {
   final _confirmCtrl = TextEditingController();
   final _alamatCtrl = TextEditingController();
   final _tanggalCtrl = TextEditingController();
+  final _emailCtrl = TextEditingController();
 
   bool _showPassword = false;
   bool _showConfirmation = false;
@@ -39,6 +40,7 @@ class _RegisterPageState extends State<RegisterPage> {
       _namaCtrl,
       _nimCtrl,
       _usernameCtrl,
+      _emailCtrl, // baru
       _passCtrl,
       _confirmCtrl,
       _alamatCtrl,
@@ -75,6 +77,7 @@ class _RegisterPageState extends State<RegisterPage> {
       namaLengkap: _namaCtrl.text.trim(),
       nim: _nimCtrl.text.trim(),
       username: _usernameCtrl.text.trim(),
+      email: _emailCtrl.text.trim(), // baru
       password: _passCtrl.text,
       alamat: _alamatCtrl.text.trim(),
       tanggalLahir: _tanggalCtrl.text.trim(),
@@ -258,6 +261,22 @@ class _RegisterPageState extends State<RegisterPage> {
                       icon: Icons.account_circle_outlined,
                       requiredMark: true,
                       autofillHints: const [AutofillHints.username],
+                    ),
+                    _field(
+                      controller: _emailCtrl,
+                      hint: 'Email Address',
+                      icon: Icons.email_outlined,
+                      keyboardType: TextInputType.emailAddress,
+                      requiredMark: true,
+                      autofillHints: const [AutofillHints.email],
+                      validator: (v) {
+                        final value = v?.trim() ?? '';
+                        if (value.isEmpty) return 'Kolom harus diisi';
+                        if (!RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$').hasMatch(value)) {
+                          return 'Format email tidak valid';
+                        }
+                        return null;
+                      },
                     ),
                     _field(
                       controller: _passCtrl,

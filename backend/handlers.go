@@ -55,6 +55,7 @@ func (h *Handler) Register(c *gin.Context) {
 		NIM:          req.NIM,
 		Email:        req.Email,
 		PasswordHash: string(hash),
+		Role:         RoleMahasiswa, // role tidak pernah diterima dari client
 	}
 	if err := h.DB.Create(&user).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Gagal menyimpan akun"})

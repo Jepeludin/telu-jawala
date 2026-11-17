@@ -1,0 +1,1 @@
+ALTER TABLE jadwal_requests ALTER COLUMN kelas TYPE varchar(50);
